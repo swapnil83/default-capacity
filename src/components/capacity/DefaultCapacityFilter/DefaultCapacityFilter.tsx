@@ -6,7 +6,9 @@ import {
     Select,
     FormControl,
     InputLabel,
-    SelectChangeEvent
+    SelectChangeEvent,
+    Typography,
+    Modal
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -41,6 +43,8 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
     const [calendarizationFieldVisibility, setCalendarizationFieldVisibility] = useState<boolean>(false);
     const [dateFieldsVisibility, setDateFieldsVisibility] = useState<boolean>(false);
+    const [openConflictModal, setOpenConflictModal] = useState<boolean>(false); // Modal state
+    const [conflictMessage, setConflictMessage] = useState<string>("");
 
     const updateLocations = (newState: Partial<LocationsState>) => {
         setLocationsState((prevState) => ({
@@ -137,6 +141,32 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
         }
     };
 
+    // Check if the selected date range overlaps with existing ranges
+    const checkDateConflict = (startDate: Date | null, endDate: Date | null) => {
+        if (!startDate || !endDate) return false;
+
+        const selectedStart = new Date(startDate);
+        const selectedEnd = new Date(endDate);
+
+        const existingRanges = calendarizationState.calendarization.filter(
+            (cal) => cal.startDate && cal.endDate && cal.value !== "Default View" && cal.value !== "Add Calendarization"
+        );
+
+        for (const range of existingRanges) {
+            const rangeStart = new Date(range.startDate!);
+            const rangeEnd = new Date(range.endDate!);
+
+            // Check for overlap
+            if (selectedStart <= rangeEnd && selectedEnd >= rangeStart) {
+                setConflictMessage(
+                    `The selected date range conflicts with "${range.value}" (${range.startDate} - ${range.endDate}).`
+                );
+                return true;
+            }
+        }
+        return false;
+    };
+
     const handleStateChange = (event: SelectChangeEvent) => {
         updateDefaultCapacityState({
             selectedState: event.target.value,
@@ -226,6 +256,18 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
         }
     };
 
+    const handleEndDateChange = (newValue: Date | null) => {
+        updateDefaultCapacityState({ endDate: newValue });
+        setErrors({ ...errors, endDate: "" });
+
+        if (defaultCapacityState.selectedCalendarization === "Add Calendarization" && newValue) {
+            const hasConflict = checkDateConflict(defaultCapacityState.startDate, newValue);
+            if (hasConflict) {
+                setOpenConflictModal(true); // Show modal if conflict detected
+            }
+        }
+    };
+
     const handleClear = () => {
         updateDefaultCapacityState({
             selectedState: "",
@@ -277,6 +319,11 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
             setShowDefaultCapacityTable(true);
             console.log("Searching with:", defaultCapacityState);
         }
+    };
+
+    const handleCloseModal = () => {
+        setOpenConflictModal(false);
+        updateDefaultCapacityState({ startDate: null, endDate: null }); // Reset dates on conflict
     };
 
     const marketsForSelectedState = locationsState.states.find(
@@ -426,12 +473,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
                                     <DatePicker
                                         label="End Date"
                                         value={defaultCapacityState.endDate}
-                                        onChange={(newValue) => {
-                                            updateDefaultCapacityState({
-                                                endDate: newValue,
-                                            });
-                                            setErrors({ ...errors, endDate: '' });
-                                        }}
+                                        onChange={handleEndDateChange}
                                         minDate={defaultCapacityState.startDate ? new Date(defaultCapacityState.startDate.getTime() + 24 * 60 * 60 * 1000) : new Date()}
                                         disabled={!defaultCapacityState.startDate}
                                         slotProps={{ textField: { sx: { width: { xs: "100%", sm: "250px" } } } }}
@@ -484,6 +526,34 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
                         Clear
                     </Button>
                 </Box>
+
+                {/* Conflict Modal */}
+                <Modal open={openConflictModal} onClose={handleCloseModal}>
+                    <Box
+                        sx={{
+                            position: "absolute",
+                            top: "50%",
+                            left: "50%",
+                            transform: "translate(-50%, -50%)",
+                            width: 400,
+                            bgcolor: "background.paper",
+                            border: "2px solid #000",
+                            boxShadow: 24,
+                            borderRadius: '20px',
+                            p: 4,
+                        }}
+                    >
+                        <Typography variant="h6" component="h2">
+                            Date Range Conflict
+                        </Typography>
+                        <Typography sx={{ mt: 2 }}>{conflictMessage}</Typography>
+                        <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
+                            <Button onClick={handleCloseModal} variant="contained" sx={{ backgroundColor: '#ffcc00', color: '#000000', fontWeight: 'bold' }}>
+                                OK
+                            </Button>
+                        </Box>
+                    </Box>
+                </Modal>
             </Box>
         </>
     );

@@ -1,4 +1,4 @@
-<FormControl fullWidth sx={{ width: { xs: "100%", sm: "250px" } }} disabled={locationsState.states.length === 0 || dateFieldsVisibility}>
+{/* <FormControl fullWidth sx={{ width: { xs: "100%", sm: "250px" } }} disabled={locationsState.states.length === 0 || dateFieldsVisibility}>
     <InputLabel
         sx={{
             // Position label at top-left
@@ -61,4 +61,4 @@
         ))}
     </Select>
     {renderError('state')}
-</FormControl>
+</FormControl> */}
