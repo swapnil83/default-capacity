@@ -348,6 +348,15 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
     const showDateFields = defaultCapacityState.selectedCalendarization === "Add Calendarization" ||
         (defaultCapacityState.selectedCalendarization !== "Default View" && dateFieldsVisibility);
 
+    // Determine if the Clear button should be disabled
+    const isClearDisabled =
+        !defaultCapacityState.selectedState &&
+        !defaultCapacityState.selectedMarket &&
+        !defaultCapacityState.selectedTerritory &&
+        defaultCapacityState.selectedCalendarization === "Default View" &&
+        !defaultCapacityState.startDate &&
+        !defaultCapacityState.endDate;
+
     return (
         <>
             {(locationsState.isLoading || calendarizationState.isLoading) && <Spinner />}
@@ -503,16 +512,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
                     <Button
                         variant="outlined"
                         onClick={handleClear}
-                        disabled={
-                            dateFieldsVisibility ||
-                            (
-                                !defaultCapacityState.selectedState &&
-                                !defaultCapacityState.selectedMarket &&
-                                !defaultCapacityState.selectedTerritory &&
-                                !defaultCapacityState.startDate &&
-                                !defaultCapacityState.endDate
-                            )
-                        }
+                        disabled={isClearDisabled}
                         sx={{
                             borderColor: '#ffcc00',
                             color: '#ffcc00',
