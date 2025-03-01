@@ -24,16 +24,27 @@ type DefaultCapacityFilterProps = {
     updateDefaultCapacityFilterState: (newState: Partial<DefaultCapacityFilterState>) => void;
     showDefaultCapacityTable: boolean;
     setShowDefaultCapacityTable: React.Dispatch<React.SetStateAction<boolean>>;
+    calendarizationFieldVisibility: boolean;
+    setCalendarizationFieldVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+    locationsState: LocationsState;
+    updateLocations: (newState: Partial<LocationsState>) => void;
+    dateFieldsVisibility: boolean;
+    setDateFieldsVisibility: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCapacityFilterState, updateDefaultCapacityFilterState, showDefaultCapacityTable, setShowDefaultCapacityTable }) => {
+const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({
+    defaultCapacityFilterState,
+    updateDefaultCapacityFilterState,
+    showDefaultCapacityTable,
+    setShowDefaultCapacityTable,
+    calendarizationFieldVisibility,
+    setCalendarizationFieldVisibility,
+    locationsState,
+    updateLocations,
+    dateFieldsVisibility,
+    setDateFieldsVisibility,
+}) => {
     console.log('DefaultCapacityFilter');
-    const [locationsState, setLocationsState] = useState<LocationsState>({
-        status: 'idle',
-        states: [],
-        errorMessage: "",
-        isLoading: false
-    });
     const [calendarizationState, setCalendarizationState] = useState<CalendarizationState>({
         status: 'idle',
         calendarization: [],
@@ -41,17 +52,8 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
         isLoading: false
     });
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [calendarizationFieldVisibility, setCalendarizationFieldVisibility] = useState<boolean>(false);
-    const [dateFieldsVisibility, setDateFieldsVisibility] = useState<boolean>(false);
     const [openConflictModal, setOpenConflictModal] = useState<boolean>(false); // Modal state
     const [conflictMessage, setConflictMessage] = useState<string>("");
-
-    const updateLocations = (newState: Partial<LocationsState>) => {
-        setLocationsState((prevState) => ({
-            ...prevState,
-            ...newState
-        }));
-    };
 
     const updateCalendarization = (newState: Partial<CalendarizationState>) => {
         setCalendarizationState((prevState) => ({
