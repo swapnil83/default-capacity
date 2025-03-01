@@ -77,6 +77,7 @@ const DefaultCapacity: React.FC<DefaultCapacityProps> = () => {
                     updateLocations={updateLocations}
                     dateFieldsVisibility={dateFieldsVisibility}
                     setDateFieldsVisibility={setDateFieldsVisibility}
+                    isTableDataEdited={isTableDataEdited}
                 />
                 {
                     showDefaultCapacityTable &&

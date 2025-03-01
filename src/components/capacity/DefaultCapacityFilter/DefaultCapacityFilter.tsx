@@ -8,7 +8,7 @@ import {
     InputLabel,
     SelectChangeEvent,
     Typography,
-    Modal
+    Modal,
 } from "@mui/material";
 import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
@@ -30,6 +30,7 @@ type DefaultCapacityFilterProps = {
     updateLocations: (newState: Partial<LocationsState>) => void;
     dateFieldsVisibility: boolean;
     setDateFieldsVisibility: React.Dispatch<React.SetStateAction<boolean>>;
+    isTableDataEdited?: boolean; // Optional prop from parent
 };
 
 const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({
@@ -43,17 +44,20 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({
     updateLocations,
     dateFieldsVisibility,
     setDateFieldsVisibility,
+    isTableDataEdited = false, // Default to false if not provided
 }) => {
     console.log('DefaultCapacityFilter');
     const [calendarizationState, setCalendarizationState] = useState<CalendarizationState>({
         status: 'idle',
         calendarization: [],
         errorMessage: "",
-        isLoading: false
+        isLoading: false,
     });
     const [errors, setErrors] = useState<{ [key: string]: string }>({});
-    const [openConflictModal, setOpenConflictModal] = useState<boolean>(false); // Modal state
+    const [openConflictModal, setOpenConflictModal] = useState<boolean>(false);
     const [conflictMessage, setConflictMessage] = useState<string>("");
+    const [openCalendarizationChangeModal, setOpenCalendarizationChangeModal] = useState<boolean>(false); // New modal state
+    const [pendingCalendarizationChange, setPendingCalendarizationChange] = useState<(() => void) | null>(null); // Store pending change
 
     const updateCalendarization = (newState: Partial<CalendarizationState>) => {
         setCalendarizationState((prevState) => ({
@@ -233,37 +237,47 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({
 
     const handleCalendarizationChange = (event: SelectChangeEvent) => {
         const value = event.target.value;
-        updateDefaultCapacityFilterState({
-            selectedCalendarization: value,
-        });
-        setErrors({ ...errors, startDate: '', endDate: '' });
+        const changeFn = () => {
+            updateDefaultCapacityFilterState({
+                selectedCalendarization: value,
+            });
+            setErrors({ ...errors, startDate: '', endDate: '' });
 
-        if (showDefaultCapacityTable) {
-            setShowDefaultCapacityTable(false);
-        }
-
-        const selectedCal = calendarizationState.calendarization.find(cal => cal.value === value);
-        if (selectedCal) {
-            if (value === "Default View") {
-                updateDefaultCapacityFilterState({
-                    startDate: null,
-                    endDate: null
-                });
-                setDateFieldsVisibility(false);
-            } else if (value === "Add Calendarization") {
-                updateDefaultCapacityFilterState({
-                    startDate: null,
-                    endDate: null
-                });
-                setDateFieldsVisibility(false);
-            } else if (selectedCal.startDate && selectedCal.endDate) {
-                updateDefaultCapacityFilterState({
-                    startDate: new Date(selectedCal.startDate),
-                    endDate: new Date(selectedCal.endDate)
-                });
-                setDateFieldsVisibility(true);
-                setErrors({});
+            if (showDefaultCapacityTable) {
+                setShowDefaultCapacityTable(false);
             }
+
+            const selectedCal = calendarizationState.calendarization.find(cal => cal.value === value);
+            if (selectedCal) {
+                if (value === "Default View") {
+                    updateDefaultCapacityFilterState({
+                        startDate: null,
+                        endDate: null
+                    });
+                    setDateFieldsVisibility(false);
+                } else if (value === "Add Calendarization") {
+                    updateDefaultCapacityFilterState({
+                        startDate: null,
+                        endDate: null
+                    });
+                    setDateFieldsVisibility(true); // Show date fields immediately
+                } else if (selectedCal.startDate && selectedCal.endDate) {
+                    updateDefaultCapacityFilterState({
+                        startDate: new Date(selectedCal.startDate),
+                        endDate: new Date(selectedCal.endDate),
+                    });
+                    setDateFieldsVisibility(true);
+                    setErrors({});
+                }
+            }
+        };
+
+        // Check if table data is edited and table is visible
+        if (isTableDataEdited && showDefaultCapacityTable) {
+            setPendingCalendarizationChange(() => changeFn); // Store the change
+            setOpenCalendarizationChangeModal(true); // Show confirmation modal
+        } else {
+            changeFn(); // Apply change directly if no edits or table not visible
         }
     };
 
@@ -286,7 +300,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({
             selectedTerritory: "",
             selectedCalendarization: "Default View",
             startDate: null,
-            endDate: null
+            endDate: null,
         });
         setErrors({});
         setDateFieldsVisibility(false);
@@ -332,9 +346,22 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({
         }
     };
 
-    const handleCloseModal = () => {
+    const handleCloseConflictModal = () => {
         setOpenConflictModal(false);
-        updateDefaultCapacityFilterState({ startDate: null, endDate: null }); // Reset dates on conflict
+        updateDefaultCapacityFilterState({ startDate: null, endDate: null });
+    };
+
+    const handleConfirmCalendarizationChange = () => {
+        if (pendingCalendarizationChange) {
+            pendingCalendarizationChange();
+        }
+        setOpenCalendarizationChangeModal(false);
+        setPendingCalendarizationChange(null);
+    };
+
+    const handleCancelCalendarizationChange = () => {
+        setOpenCalendarizationChangeModal(false);
+        setPendingCalendarizationChange(null);
     };
 
     const marketsForSelectedState = locationsState.states.find(
@@ -487,7 +514,6 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({
                                             setErrors({ ...errors, startDate: '' });
                                         }}
                                         minDate={new Date()}
-                                        // slotProps={{ textField: { sx: { width: { xs: "100%", sm: "250px" } } } }}
                                         slotProps={{
                                             textField: {
                                                 sx: {
@@ -571,7 +597,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({
                 </Box>
 
                 {/* Conflict Modal */}
-                <Modal open={openConflictModal} onClose={handleCloseModal}>
+                <Modal open={openConflictModal} onClose={handleCloseConflictModal}>
                     <Box
                         sx={{
                             position: "absolute",
@@ -591,13 +617,25 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({
                         </Typography>
                         <Typography sx={{ mt: 2 }}>{conflictMessage}</Typography>
                         <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end" }}>
-                            <Button onClick={handleCloseModal} variant="contained" sx={{ backgroundColor: '#ffcc00', color: '#000000', fontWeight: 'bold' }}>
+                            <Button onClick={handleCloseConflictModal} variant="contained" sx={{ backgroundColor: '#ffcc00', color: '#000000', fontWeight: 'bold' }}>
                                 OK
                             </Button>
                         </Box>
                     </Box>
                 </Modal>
-            </Box>
+
+                {/* Calendarization Change Confirmation Modal */}
+                <Modal open={openCalendarizationChangeModal} onClose={handleCancelCalendarizationChange}>
+                    <Box sx={{ position: "absolute", top: "50%", left: "50%", transform: "translate(-50%, -50%)", width: 400, bgcolor: "background.paper", border: "2px solid #000", boxShadow: 24, borderRadius: '20px', p: 4 }}>
+                        <Typography variant="h6" component="h2">Confirm Calendarization Change</Typography>
+                        <Typography sx={{ mt: 2 }}>You have unsaved changes in the table. Changing the calendarization will discard these changes. Are you sure you want to proceed?</Typography>
+                        <Box sx={{ mt: 3, display: "flex", justifyContent: "flex-end", gap: 2 }}>
+                            <Button onClick={handleCancelCalendarizationChange} variant="outlined" sx={{ borderColor: '#ffcc00', color: '#ffcc00', fontWeight: 'bold' }}>Cancel</Button>
+                            <Button onClick={handleConfirmCalendarizationChange} variant="contained" sx={{ backgroundColor: '#ffcc00', color: '#000000', fontWeight: 'bold' }}>Proceed</Button>
+                        </Box>
+                    </Box>
+                </Modal>
+            </Box >
         </>
     );
 };
