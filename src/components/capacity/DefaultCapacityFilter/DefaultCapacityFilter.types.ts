@@ -55,3 +55,12 @@ export interface CalendarizationState {
     errorMessage: string;
     isLoading: boolean;
 };
+
+export interface DefaultCapacityFilterState {
+    selectedState: string;
+    selectedMarket: string;
+    selectedTerritory: string;
+    selectedCalendarization: string;
+    startDate: Date | null;
+    endDate: Date | null;
+};

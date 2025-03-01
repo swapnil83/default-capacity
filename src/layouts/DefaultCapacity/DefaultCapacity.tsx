@@ -4,7 +4,8 @@ import { Box } from '@mui/material';
 import PageTitle from '../../components/common/PageTitle/PageTitle';
 import DefaultCapacityFilter from '../../components/capacity/DefaultCapacityFilter/DefaultCapacityFilter';
 import DefaultCapacityTable from '../../components/capacity/DefaultCapacityTable/DefaultCapacityTable';
-import { DefaultCapacityState, DefaultCapacityTableState } from './DefaultCapacity.types';
+import { DefaultCapacityFilterState } from '../../components/capacity/DefaultCapacityFilter/DefaultCapacityFilter.types';
+import { DefaultCapacityTableState } from '../../components/capacity/DefaultCapacityTable/DefaultCapacityTable.types';
 
 type DefaultCapacityProps = {
 
@@ -12,7 +13,7 @@ type DefaultCapacityProps = {
 
 const DefaultCapacity: React.FC<DefaultCapacityProps> = () => {
     console.log('DefaultCapacity');
-    const [defaultCapacityFilterState, setDefaultCapacityFilterState] = useState<DefaultCapacityState>({
+    const [defaultCapacityFilterState, setDefaultCapacityFilterState] = useState<DefaultCapacityFilterState>({
         selectedState: "",
         selectedMarket: "",
         selectedTerritory: "",
@@ -31,7 +32,7 @@ const DefaultCapacity: React.FC<DefaultCapacityProps> = () => {
     });
     const [showDefaultCapacityTable, setShowDefaultCapacityTable] = useState<boolean>(false);
 
-    const updateDefaultCapacityState = (newState: Partial<DefaultCapacityState>) => {
+    const updateDefaultCapacityFilterState = (newState: Partial<DefaultCapacityFilterState>) => {
         setDefaultCapacityFilterState((prevState) => ({
             ...prevState,
             ...newState
@@ -51,7 +52,7 @@ const DefaultCapacity: React.FC<DefaultCapacityProps> = () => {
             <Box sx={{ padding: 3 }}>
                 <DefaultCapacityFilter
                     defaultCapacityFilterState={defaultCapacityFilterState}
-                    updateDefaultCapacityState={updateDefaultCapacityState}
+                    updateDefaultCapacityFilterState={updateDefaultCapacityFilterState}
                     showDefaultCapacityTable={showDefaultCapacityTable}
                     setShowDefaultCapacityTable={setShowDefaultCapacityTable}
                 />

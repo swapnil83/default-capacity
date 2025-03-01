@@ -14,19 +14,19 @@ import { DatePicker } from "@mui/x-date-pickers/DatePicker";
 import { LocalizationProvider } from "@mui/x-date-pickers/LocalizationProvider";
 import { AdapterDateFns } from "@mui/x-date-pickers/AdapterDateFns";
 import Spinner from "../../common/Spinner/Spinner";
-import { CalendarizationState, LocationsState, LocationsApiResponseData, CalendarizationApiResponseData } from "./DefaultCapacityFilter.types";
+import { CalendarizationState, LocationsState, LocationsApiResponseData, CalendarizationApiResponseData, DefaultCapacityFilterState } from "./DefaultCapacityFilter.types";
 import { locationsData } from "../../../data/locations";
 import { calendarizationData } from "../../../data/calendarization";
-import { DefaultCapacityState } from "../../../layouts/DefaultCapacity/DefaultCapacity.types";
+import { defaultCalendarizationData } from "../../../data/default-calendarization";
 
 type DefaultCapacityFilterProps = {
-    defaultCapacityFilterState: DefaultCapacityState;
-    updateDefaultCapacityState: (newState: Partial<DefaultCapacityState>) => void;
+    defaultCapacityFilterState: DefaultCapacityFilterState;
+    updateDefaultCapacityFilterState: (newState: Partial<DefaultCapacityFilterState>) => void;
     showDefaultCapacityTable: boolean;
     setShowDefaultCapacityTable: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCapacityFilterState, updateDefaultCapacityState, showDefaultCapacityTable, setShowDefaultCapacityTable }) => {
+const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCapacityFilterState, updateDefaultCapacityFilterState, showDefaultCapacityTable, setShowDefaultCapacityTable }) => {
     console.log('DefaultCapacityFilter');
     const [locationsState, setLocationsState] = useState<LocationsState>({
         status: 'idle',
@@ -114,12 +114,21 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
                 status: "success",
                 data: calendarizationData,
             };
+
+            const mergedCalendarizationData = {
+                calendarization: [
+                    ...defaultCalendarizationData.calendarization,
+                    ...response.data.calendarization,
+                ],
+            };
+
+
             if (response.status === 'success') {
                 updateCalendarization({
                     status: response.status,
-                    calendarization: response.data.calendarization,
+                    calendarization: mergedCalendarizationData.calendarization
                 });
-                updateDefaultCapacityState({
+                updateDefaultCapacityFilterState({
                     selectedCalendarization: "Default View",
                 });
                 setCalendarizationFieldVisibility(true);
@@ -168,7 +177,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
     };
 
     const handleStateChange = (event: SelectChangeEvent) => {
-        updateDefaultCapacityState({
+        updateDefaultCapacityFilterState({
             selectedState: event.target.value,
             selectedMarket: "",
             selectedTerritory: "",
@@ -186,7 +195,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
     };
 
     const handleMarketChange = (event: SelectChangeEvent) => {
-        updateDefaultCapacityState({
+        updateDefaultCapacityFilterState({
             selectedMarket: event.target.value,
             selectedTerritory: "",
         });
@@ -203,7 +212,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
     };
 
     const handleTerritoryChange = (event: SelectChangeEvent) => {
-        updateDefaultCapacityState({
+        updateDefaultCapacityFilterState({
             selectedTerritory: event.target.value,
         });
         setErrors({ ...errors, territory: '' });
@@ -222,7 +231,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
 
     const handleCalendarizationChange = (event: SelectChangeEvent) => {
         const value = event.target.value;
-        updateDefaultCapacityState({
+        updateDefaultCapacityFilterState({
             selectedCalendarization: value,
         });
         setErrors({ ...errors, startDate: '', endDate: '' });
@@ -234,19 +243,19 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
         const selectedCal = calendarizationState.calendarization.find(cal => cal.value === value);
         if (selectedCal) {
             if (value === "Default View") {
-                updateDefaultCapacityState({
+                updateDefaultCapacityFilterState({
                     startDate: null,
                     endDate: null
                 });
                 setDateFieldsVisibility(false);
             } else if (value === "Add Calendarization") {
-                updateDefaultCapacityState({
+                updateDefaultCapacityFilterState({
                     startDate: null,
                     endDate: null
                 });
                 setDateFieldsVisibility(false);
             } else if (selectedCal.startDate && selectedCal.endDate) {
-                updateDefaultCapacityState({
+                updateDefaultCapacityFilterState({
                     startDate: new Date(selectedCal.startDate),
                     endDate: new Date(selectedCal.endDate)
                 });
@@ -257,7 +266,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
     };
 
     const handleEndDateChange = (newValue: Date | null) => {
-        updateDefaultCapacityState({ endDate: newValue });
+        updateDefaultCapacityFilterState({ endDate: newValue });
         setErrors({ ...errors, endDate: "" });
 
         if (defaultCapacityFilterState.selectedCalendarization === "Add Calendarization" && newValue) {
@@ -269,7 +278,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
     };
 
     const handleClear = () => {
-        updateDefaultCapacityState({
+        updateDefaultCapacityFilterState({
             selectedState: "",
             selectedMarket: "",
             selectedTerritory: "",
@@ -323,7 +332,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
 
     const handleCloseModal = () => {
         setOpenConflictModal(false);
-        updateDefaultCapacityState({ startDate: null, endDate: null }); // Reset dates on conflict
+        updateDefaultCapacityFilterState({ startDate: null, endDate: null }); // Reset dates on conflict
     };
 
     const marketsForSelectedState = locationsState.states.find(
@@ -470,7 +479,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
                                         label="Start Date"
                                         value={defaultCapacityFilterState.startDate}
                                         onChange={(newValue) => {
-                                            updateDefaultCapacityState({
+                                            updateDefaultCapacityFilterState({
                                                 startDate: newValue,
                                             });
                                             setErrors({ ...errors, startDate: '' });
