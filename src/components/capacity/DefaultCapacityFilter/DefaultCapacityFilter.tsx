@@ -386,6 +386,17 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({
     const showDateFields = defaultCapacityFilterState.selectedCalendarization === "Add Calendarization" ||
         (defaultCapacityFilterState.selectedCalendarization !== "Default View" && dateFieldsVisibility);
 
+    // Determine if "End Date" should be disabled (for existing calendarization options with predefined dates)
+    const isEndDateDisabled = defaultCapacityFilterState.selectedCalendarization !== "Default View" &&
+        defaultCapacityFilterState.selectedCalendarization !== "Add Calendarization" &&
+        dateFieldsVisibility;
+
+    // Determine the maxDate for Start Date picker based on selected calendarization's endDate
+    const selectedCal = calendarizationState.calendarization.find(cal => cal.value === defaultCapacityFilterState.selectedCalendarization);
+    const maxStartDate = selectedCal && selectedCal.endDate && defaultCapacityFilterState.selectedCalendarization !== "Default View" && defaultCapacityFilterState.selectedCalendarization !== "Add Calendarization"
+        ? new Date(new Date(selectedCal.endDate).getTime() - 24 * 60 * 60 * 1000) // Subtract one day
+        : undefined;
+
     // Determine if the Clear button should be disabled
     const isClearDisabled =
         !defaultCapacityFilterState.selectedState &&
@@ -514,6 +525,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({
                                             setErrors({ ...errors, startDate: '' });
                                         }}
                                         minDate={new Date()}
+                                        maxDate={maxStartDate}
                                         slotProps={{
                                             textField: {
                                                 sx: {
@@ -553,7 +565,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({
                                         value={defaultCapacityFilterState.endDate}
                                         onChange={handleEndDateChange}
                                         minDate={defaultCapacityFilterState.startDate ? new Date(defaultCapacityFilterState.startDate.getTime() + 24 * 60 * 60 * 1000) : new Date()}
-                                        disabled={!defaultCapacityFilterState.startDate}
+                                        disabled={isEndDateDisabled || !defaultCapacityFilterState.startDate}
                                         slotProps={{ textField: { sx: { width: { xs: "100%", sm: "250px" } } } }}
                                     />
                                     {renderError('endDate')}
