@@ -20,13 +20,13 @@ import { calendarizationData } from "../../../data/calendarization";
 import { DefaultCapacityState } from "../../../layouts/DefaultCapacity/DefaultCapacity.types";
 
 type DefaultCapacityFilterProps = {
-    defaultCapacityState: DefaultCapacityState;
+    defaultCapacityFilterState: DefaultCapacityState;
     updateDefaultCapacityState: (newState: Partial<DefaultCapacityState>) => void;
     showDefaultCapacityTable: boolean;
     setShowDefaultCapacityTable: React.Dispatch<React.SetStateAction<boolean>>;
 };
 
-const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCapacityState, updateDefaultCapacityState, showDefaultCapacityTable, setShowDefaultCapacityTable }) => {
+const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCapacityFilterState, updateDefaultCapacityState, showDefaultCapacityTable, setShowDefaultCapacityTable }) => {
     console.log('DefaultCapacityFilter');
     const [locationsState, setLocationsState] = useState<LocationsState>({
         status: 'idle',
@@ -260,8 +260,8 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
         updateDefaultCapacityState({ endDate: newValue });
         setErrors({ ...errors, endDate: "" });
 
-        if (defaultCapacityState.selectedCalendarization === "Add Calendarization" && newValue) {
-            const hasConflict = checkDateConflict(defaultCapacityState.startDate, newValue);
+        if (defaultCapacityFilterState.selectedCalendarization === "Add Calendarization" && newValue) {
+            const hasConflict = checkDateConflict(defaultCapacityFilterState.startDate, newValue);
             if (hasConflict) {
                 setOpenConflictModal(true); // Show modal if conflict detected
             }
@@ -287,25 +287,25 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
         let newErrors: { [key: string]: string } = {};
 
         // always validate state as it's always enabled initially
-        if (!defaultCapacityState.selectedState) {
+        if (!defaultCapacityFilterState.selectedState) {
             newErrors.state = 'State is required';
         }
 
         // validate market only if state is selected (market field is enabled)
-        if (defaultCapacityState.selectedState && !defaultCapacityState.selectedMarket) {
+        if (defaultCapacityFilterState.selectedState && !defaultCapacityFilterState.selectedMarket) {
             newErrors.market = 'Market is required';
         }
 
         // validate territory only if market is selected (territory field is enabled)
-        if (defaultCapacityState.selectedMarket && !defaultCapacityState.selectedTerritory) {
+        if (defaultCapacityFilterState.selectedMarket && !defaultCapacityFilterState.selectedTerritory) {
             newErrors.territory = 'Service Territory is required';
         }
 
         // calendarization validation
-        if (defaultCapacityState.selectedCalendarization === "Add Calendarization") {
-            if (!defaultCapacityState.startDate) newErrors.startDate = 'Start Date is required';
-            if (!defaultCapacityState.endDate) newErrors.endDate = 'End Date is required';
-            if (defaultCapacityState.startDate && defaultCapacityState.endDate && defaultCapacityState.startDate > defaultCapacityState.endDate) {
+        if (defaultCapacityFilterState.selectedCalendarization === "Add Calendarization") {
+            if (!defaultCapacityFilterState.startDate) newErrors.startDate = 'Start Date is required';
+            if (!defaultCapacityFilterState.endDate) newErrors.endDate = 'End Date is required';
+            if (defaultCapacityFilterState.startDate && defaultCapacityFilterState.endDate && defaultCapacityFilterState.startDate > defaultCapacityFilterState.endDate) {
                 newErrors.endDate = 'End Date must be after Start Date';
             }
         }
@@ -317,7 +317,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
     const handleSearch = () => {
         if (validateForm()) {
             setShowDefaultCapacityTable(true);
-            console.log("Searching with:", defaultCapacityState);
+            console.log("Searching with:", defaultCapacityFilterState);
         }
     };
 
@@ -327,11 +327,11 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
     };
 
     const marketsForSelectedState = locationsState.states.find(
-        (stateItem) => stateItem.state === defaultCapacityState.selectedState
+        (stateItem) => stateItem.state === defaultCapacityFilterState.selectedState
     )?.markets || [];
 
     const territoriesForSelectedMarket = marketsForSelectedState.find(
-        (market) => market.market === defaultCapacityState.selectedMarket
+        (market) => market.market === defaultCapacityFilterState.selectedMarket
     )?.serviceTerritories || [];
 
     const renderError = (field: string) => {
@@ -345,17 +345,17 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
         return null;
     };
 
-    const showDateFields = defaultCapacityState.selectedCalendarization === "Add Calendarization" ||
-        (defaultCapacityState.selectedCalendarization !== "Default View" && dateFieldsVisibility);
+    const showDateFields = defaultCapacityFilterState.selectedCalendarization === "Add Calendarization" ||
+        (defaultCapacityFilterState.selectedCalendarization !== "Default View" && dateFieldsVisibility);
 
     // Determine if the Clear button should be disabled
     const isClearDisabled =
-        !defaultCapacityState.selectedState &&
-        !defaultCapacityState.selectedMarket &&
-        !defaultCapacityState.selectedTerritory &&
-        defaultCapacityState.selectedCalendarization === "Default View" &&
-        !defaultCapacityState.startDate &&
-        !defaultCapacityState.endDate;
+        !defaultCapacityFilterState.selectedState &&
+        !defaultCapacityFilterState.selectedMarket &&
+        !defaultCapacityFilterState.selectedTerritory &&
+        defaultCapacityFilterState.selectedCalendarization === "Default View" &&
+        !defaultCapacityFilterState.startDate &&
+        !defaultCapacityFilterState.endDate;
 
     return (
         <>
@@ -381,8 +381,16 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
                 {/* First Row: State, Market, Territory */}
                 <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, marginBottom: 5 }}>
                     <FormControl fullWidth sx={{ width: { xs: "100%", sm: "250px" } }} disabled={locationsState.states.length === 0 || dateFieldsVisibility}>
-                        <InputLabel>State</InputLabel>
-                        <Select value={defaultCapacityState.selectedState} onChange={handleStateChange} label="State">
+                        <InputLabel
+                            sx={{
+                                '&.Mui-focused': {
+                                    color: 'black',
+                                },
+                            }}
+                        >
+                            State
+                        </InputLabel>
+                        <Select value={defaultCapacityFilterState.selectedState} onChange={handleStateChange} label="State">
                             {locationsState.states.map((state) => (
                                 <MenuItem key={state.state} value={state.state}>
                                     {state.state}
@@ -392,9 +400,17 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
                         {renderError('state')}
                     </FormControl>
 
-                    <FormControl fullWidth sx={{ width: { xs: "100%", sm: "250px" } }} disabled={!defaultCapacityState.selectedState || dateFieldsVisibility}>
-                        <InputLabel>Market</InputLabel>
-                        <Select value={defaultCapacityState.selectedMarket} onChange={handleMarketChange} label="Market">
+                    <FormControl fullWidth sx={{ width: { xs: "100%", sm: "250px" } }} disabled={!defaultCapacityFilterState.selectedState || dateFieldsVisibility}>
+                        <InputLabel
+                            sx={{
+                                '&.Mui-focused': {
+                                    color: 'black',
+                                },
+                            }}
+                        >
+                            Market
+                        </InputLabel>
+                        <Select value={defaultCapacityFilterState.selectedMarket} onChange={handleMarketChange} label="Market">
                             {marketsForSelectedState.map((market) => (
                                 <MenuItem key={market.market} value={market.market}>
                                     {market.market}
@@ -404,9 +420,17 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
                         {renderError('market')}
                     </FormControl>
 
-                    <FormControl fullWidth sx={{ width: { xs: "100%", sm: "250px" } }} disabled={!defaultCapacityState.selectedMarket || dateFieldsVisibility}>
-                        <InputLabel>Service Territory</InputLabel>
-                        <Select value={defaultCapacityState.selectedTerritory} onChange={handleTerritoryChange} label="Service Territory">
+                    <FormControl fullWidth sx={{ width: { xs: "100%", sm: "250px" } }} disabled={!defaultCapacityFilterState.selectedMarket || dateFieldsVisibility}>
+                        <InputLabel
+                            sx={{
+                                '&.Mui-focused': {
+                                    color: 'black',
+                                },
+                            }}
+                        >
+                            Service Territory
+                        </InputLabel>
+                        <Select value={defaultCapacityFilterState.selectedTerritory} onChange={handleTerritoryChange} label="Service Territory">
                             {territoriesForSelectedMarket.map((territory) => (
                                 <MenuItem key={territory.territory} value={territory.territory}>
                                     {territory.territory}
@@ -421,8 +445,16 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
                 {calendarizationFieldVisibility && (
                     <Box sx={{ display: "flex", flexWrap: "wrap", gap: 2, marginBottom: 5 }}>
                         <FormControl fullWidth sx={{ width: { xs: "100%", sm: "250px" } }} disabled={locationsState.states.length === 0}>
-                            <InputLabel>Calendarization</InputLabel>
-                            <Select value={defaultCapacityState.selectedCalendarization} onChange={handleCalendarizationChange} label="Calendarization">
+                            <InputLabel
+                                sx={{
+                                    '&.Mui-focused': {
+                                        color: 'black',
+                                    },
+                                }}
+                            >
+                                Calendarization
+                            </InputLabel>
+                            <Select value={defaultCapacityFilterState.selectedCalendarization} onChange={handleCalendarizationChange} label="Calendarization">
                                 {calendarizationState.calendarization.map((cal) => (
                                     <MenuItem key={cal.value} value={cal.value}>
                                         {cal.value}
@@ -436,7 +468,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
                                 <Box sx={{ display: "flex", flexDirection: "column" }}>
                                     <DatePicker
                                         label="Start Date"
-                                        value={defaultCapacityState.startDate}
+                                        value={defaultCapacityFilterState.startDate}
                                         onChange={(newValue) => {
                                             updateDefaultCapacityState({
                                                 startDate: newValue,
@@ -481,10 +513,10 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({ defaultCa
                                 <Box sx={{ display: "flex", flexDirection: "column" }}>
                                     <DatePicker
                                         label="End Date"
-                                        value={defaultCapacityState.endDate}
+                                        value={defaultCapacityFilterState.endDate}
                                         onChange={handleEndDateChange}
-                                        minDate={defaultCapacityState.startDate ? new Date(defaultCapacityState.startDate.getTime() + 24 * 60 * 60 * 1000) : new Date()}
-                                        disabled={!defaultCapacityState.startDate}
+                                        minDate={defaultCapacityFilterState.startDate ? new Date(defaultCapacityFilterState.startDate.getTime() + 24 * 60 * 60 * 1000) : new Date()}
+                                        disabled={!defaultCapacityFilterState.startDate}
                                         slotProps={{ textField: { sx: { width: { xs: "100%", sm: "250px" } } } }}
                                     />
                                     {renderError('endDate')}

@@ -12,7 +12,7 @@ type DefaultCapacityProps = {
 
 const DefaultCapacity: React.FC<DefaultCapacityProps> = () => {
     console.log('DefaultCapacity');
-    const [defaultCapacityState, setDefaultCapacityState] = useState<DefaultCapacityState>({
+    const [defaultCapacityFilterState, setDefaultCapacityFilterState] = useState<DefaultCapacityState>({
         selectedState: "",
         selectedMarket: "",
         selectedTerritory: "",
@@ -32,7 +32,7 @@ const DefaultCapacity: React.FC<DefaultCapacityProps> = () => {
     const [showDefaultCapacityTable, setShowDefaultCapacityTable] = useState<boolean>(false);
 
     const updateDefaultCapacityState = (newState: Partial<DefaultCapacityState>) => {
-        setDefaultCapacityState((prevState) => ({
+        setDefaultCapacityFilterState((prevState) => ({
             ...prevState,
             ...newState
         }));
@@ -50,7 +50,7 @@ const DefaultCapacity: React.FC<DefaultCapacityProps> = () => {
             <PageTitle title='Default Capacity' backgroundColor='#ffcc00' />
             <Box sx={{ padding: 3 }}>
                 <DefaultCapacityFilter
-                    defaultCapacityState={defaultCapacityState}
+                    defaultCapacityFilterState={defaultCapacityFilterState}
                     updateDefaultCapacityState={updateDefaultCapacityState}
                     showDefaultCapacityTable={showDefaultCapacityTable}
                     setShowDefaultCapacityTable={setShowDefaultCapacityTable}
@@ -58,9 +58,9 @@ const DefaultCapacity: React.FC<DefaultCapacityProps> = () => {
                 {
                     showDefaultCapacityTable &&
                     <DefaultCapacityTable
-                        startDate={defaultCapacityState.startDate}
-                        endDate={defaultCapacityState.endDate}
-                        selectedCalendarization={defaultCapacityState.selectedCalendarization}
+                        startDate={defaultCapacityFilterState.startDate}
+                        endDate={defaultCapacityFilterState.endDate}
+                        selectedCalendarization={defaultCapacityFilterState.selectedCalendarization}
                         defaultCapacityTableState={defaultCapacityTableState}
                         updateDefaultCapacityTableState={updateDefaultCapacityTableState}
                     />

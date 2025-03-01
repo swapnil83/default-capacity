@@ -10,15 +10,15 @@ export const calendarizationData: Calendarization = {
         },
         {
             id: 2,
-            value: "2025-02-23 - 2025-02-28",
-            startDate: "2025-02-23",
-            endDate: "2025-02-28"
+            value: "2025-03-11 - 2025-03-15",
+            startDate: "2025-03-11",
+            endDate: "2025-03-15"
         },
         {
             id: 3,
-            value: "2025-04-01 - 2025-04-10",
-            startDate: "2025-04-01",
-            endDate: "2025-04-10"
+            value: "2025-03-20 - 2025-03-30",
+            startDate: "2025-03-20",
+            endDate: "2025-03-30"
         },
         {
             id: 4,

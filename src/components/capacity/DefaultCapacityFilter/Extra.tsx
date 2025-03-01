@@ -19,7 +19,7 @@
         State*
     </InputLabel>
     <Select
-        value={defaultCapacityState.selectedState}
+        value={defaultCapacityFilterState.selectedState}
         onChange={handleStateChange}
         displayEmpty  // Allows showing placeholder when no value is selected
         renderValue={(selected) => {
