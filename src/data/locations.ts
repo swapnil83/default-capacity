@@ -307,40 +307,6 @@ export const locationsData: Locations = {
                     ],
                 },
             ],
-        },
-        {
-            id: 10,
-            state: "Massachusetts",
-            markets: [
-                {
-                    id: 1001,
-                    market: "Boston",
-                    serviceTerritories: [
-                        {
-                            id: 19001,
-                            territory: "Downtown Boston",
-                        },
-                        {
-                            id: 19002,
-                            territory: "Back Bay",
-                        },
-                    ],
-                },
-                {
-                    id: 1002,
-                    market: "Cambridge",
-                    serviceTerritories: [
-                        {
-                            id: 20001,
-                            territory: "Harvard Square",
-                        },
-                        {
-                            id: 20002,
-                            territory: "Kendall Square",
-                        },
-                    ],
-                },
-            ],
-        },
+        }
     ],
 };

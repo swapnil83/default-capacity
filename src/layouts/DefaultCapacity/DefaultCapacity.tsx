@@ -93,6 +93,8 @@ const DefaultCapacity: React.FC<DefaultCapacityProps> = () => {
                         setDateFieldsVisibility={setDateFieldsVisibility}
                         isTableDataEdited={isTableDataEdited}
                         setIsTableDataEdited={setIsTableDataEdited}
+                        locationsState={locationsState}
+                        defaultCapacityFilterState={defaultCapacityFilterState}
                     />
                 }
             </Box>

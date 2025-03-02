@@ -9,7 +9,8 @@ import CapacitySlots from '../CapacitySlots/CapacitySlots';
 import AppointmentSlots from '../AppointmentFreeze/AppointmentSlots';
 import { capacitySlotsAppointmentFreezeData } from '../../../data/capacitySlots-appointmentFreeze';
 import { DefaultCapacityTableApiResponseData, DefaultCapacityTableState } from './DefaultCapacityTable.types';
-import { DefaultCapacityFilterState } from '../DefaultCapacityFilter/DefaultCapacityFilter.types';
+import { DefaultCapacityFilterState, LocationsState } from '../DefaultCapacityFilter/DefaultCapacityFilter.types';
+import BulkTerritoriesSelection from '../BulkTerritoriesSelection/BulkTerritoriesSelection';
 import Spinner from '../../common/Spinner/Spinner';
 import '../../../index.css';
 
@@ -25,6 +26,8 @@ type DefaultCapacityTableProps = {
     setDateFieldsVisibility: React.Dispatch<React.SetStateAction<boolean>>;
     isTableDataEdited: boolean;
     setIsTableDataEdited: React.Dispatch<React.SetStateAction<boolean>>;
+    locationsState: LocationsState;
+    defaultCapacityFilterState: DefaultCapacityFilterState;
 };
 
 const DefaultCapacityTable: React.FC<DefaultCapacityTableProps> = ({
@@ -39,13 +42,17 @@ const DefaultCapacityTable: React.FC<DefaultCapacityTableProps> = ({
     setDateFieldsVisibility,
     isTableDataEdited,
     setIsTableDataEdited,
+    locationsState,
+    defaultCapacityFilterState,
 }) => {
+    console.log('checking: ', defaultCapacityFilterState);
     const [initialData, setInitialData] = useState<DefaultCapacityTableState["data"]>({
         capacitySlots: [],
         appointmentFreeze: [],
     });
     const [openDeleteModal, setOpenDeleteModal] = useState<boolean>(false);
     const [openResetModal, setOpenResetModal] = useState<boolean>(false);
+    const [sidebarOpen, setSidebarOpen] = useState(false);
 
     const deleteIconDisabled = selectedCalendarization === "Default View" || selectedCalendarization === "Add Calendarization";
 
@@ -145,6 +152,14 @@ const DefaultCapacityTable: React.FC<DefaultCapacityTableProps> = ({
         setOpenResetModal(false);
     };
 
+    const handleSidebarOpen = () => {
+        setSidebarOpen(true);
+    };
+
+    const handleSidebarClose = () => {
+        setSidebarOpen(false);
+    };
+
     return (
         <>
             {defaultCapacityTableState.isLoading && <Spinner />}
@@ -191,8 +206,13 @@ const DefaultCapacityTable: React.FC<DefaultCapacityTableProps> = ({
                         >
                             <ReplayIcon sx={{ color: '#ffcc00' }} />
                         </IconButton>
-                        <IconButton>
+                        <IconButton onClick={handleSidebarOpen}>
                             <BulkSubmissionIcon sx={{ color: '#ffcc00' }} />
+                            <BulkTerritoriesSelection
+                                open={sidebarOpen}
+                                onClose={handleSidebarClose}
+                                locationsData={locationsState.states}
+                            />
                         </IconButton>
                         <IconButton>
                             <SaveIcon sx={{ color: '#ffcc00' }} />
