@@ -124,6 +124,12 @@ const DefaultCapacityTable: React.FC<DefaultCapacityTableProps> = ({
             startDate: null,
             endDate: null
         });
+        updateDefaultCapacityTableState({
+            data: {
+                capacitySlots: [],
+                appointmentFreeze: []
+            }
+        });
         setCalendarizationFieldVisibility(false);
         setDateFieldsVisibility(false);
         setIsTableDataEdited(false);
@@ -192,45 +198,66 @@ const DefaultCapacityTable: React.FC<DefaultCapacityTableProps> = ({
                     <div
                         style={{
                             display: 'flex',
-                            gap: '10px',
-                            alignSelf: 'flex-end'
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
                         }}
                     >
-                        <IconButton
-                            onClick={handleResetClick}
-                            disabled={!isTableDataEdited}
+                        <Typography
+                            variant="h6"
                             sx={{
-                                '&:disabled svg': { color: '#d3d3d3' },
-                                '&:not(:disabled) svg': { color: '#ffcc00' },
+                                fontWeight: 'bold',
+                                color: '#000',
                             }}
                         >
-                            <ReplayIcon sx={{ color: '#ffcc00' }} />
-                        </IconButton>
-                        <IconButton onClick={handleSidebarOpen}>
-                            <BulkSubmissionIcon sx={{ color: '#ffcc00' }} />
-                            <BulkTerritoriesSelection
-                                open={sidebarOpen}
-                                onClose={handleSidebarClose}
-                                locationsData={locationsState.states}
-                            />
-                        </IconButton>
-                        <IconButton>
-                            <SaveIcon sx={{ color: '#ffcc00' }} />
-                        </IconButton>
-                        <IconButton
-                            disabled={deleteIconDisabled}
-                            onClick={handleDeleteClick}
-                            sx={{
-                                '&:disabled svg': {
-                                    color: '#d3d3d3',
-                                },
-                                '&:not(:disabled) svg': {
-                                    color: '#ffcc00',
-                                },
+                            {selectedCalendarization === "Default View"
+                                ? "Viewing Default Capacity Data"
+                                : selectedCalendarization === "Add Calendarization"
+                                    ? "Adding New Calendarization"
+                                    : `Viewing Calendarization Data for "${startDate} - ${endDate}`
+                            }
+                        </Typography>
+                        <div
+                            style={{
+                                display: 'flex',
+                                gap: '10px'
                             }}
                         >
-                            <DeleteIcon />
-                        </IconButton>
+                            <IconButton
+                                onClick={handleResetClick}
+                                disabled={!isTableDataEdited}
+                                sx={{
+                                    '&:disabled svg': { color: '#d3d3d3' },
+                                    '&:not(:disabled) svg': { color: '#ffcc00' },
+                                }}
+                            >
+                                <ReplayIcon sx={{ color: '#ffcc00' }} />
+                            </IconButton>
+                            <IconButton onClick={handleSidebarOpen}>
+                                <BulkSubmissionIcon sx={{ color: '#ffcc00' }} />
+                                <BulkTerritoriesSelection
+                                    open={sidebarOpen}
+                                    onClose={handleSidebarClose}
+                                    locationsData={locationsState.states}
+                                />
+                            </IconButton>
+                            <IconButton>
+                                <SaveIcon sx={{ color: '#ffcc00' }} />
+                            </IconButton>
+                            <IconButton
+                                disabled={deleteIconDisabled}
+                                onClick={handleDeleteClick}
+                                sx={{
+                                    '&:disabled svg': {
+                                        color: '#d3d3d3',
+                                    },
+                                    '&:not(:disabled) svg': {
+                                        color: '#ffcc00',
+                                    },
+                                }}
+                            >
+                                <DeleteIcon />
+                            </IconButton>
+                        </div>
                     </div>
                     <div
                         className='table-container'

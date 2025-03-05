@@ -18,6 +18,7 @@ import { CalendarizationState, LocationsState, LocationsApiResponseData, Calenda
 import { locationsData } from "../../../data/locations";
 import { calendarizationData } from "../../../data/calendarization";
 import { defaultCalendarizationData } from "../../../data/default-calendarization";
+import { DefaultCapacityTableState } from "../DefaultCapacityTable/DefaultCapacityTable.types";
 
 type DefaultCapacityFilterProps = {
     defaultCapacityFilterState: DefaultCapacityFilterState;
@@ -31,6 +32,7 @@ type DefaultCapacityFilterProps = {
     dateFieldsVisibility: boolean;
     setDateFieldsVisibility: React.Dispatch<React.SetStateAction<boolean>>;
     isTableDataEdited?: boolean; // Optional prop from parent
+    updateDefaultCapacityTableState: (newState: Partial<DefaultCapacityTableState>) => void;
 };
 
 const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({
@@ -45,6 +47,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({
     dateFieldsVisibility,
     setDateFieldsVisibility,
     isTableDataEdited = false, // Default to false if not provided
+    updateDefaultCapacityTableState,
 }) => {
     console.log('DefaultCapacityFilter');
     const [calendarizationState, setCalendarizationState] = useState<CalendarizationState>({
@@ -174,7 +177,7 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({
             // Check for overlap
             if (selectedStart <= rangeEnd && selectedEnd >= rangeStart) {
                 setConflictMessage(
-                    `The selected date range conflicts with "${range.value}" (${range.startDate} - ${range.endDate}).`
+                    `The selected date range conflicts with "${range.value}".`
                 );
                 return true;
             }
@@ -244,6 +247,12 @@ const DefaultCapacityFilter: React.FC<DefaultCapacityFilterProps> = ({
             setErrors({ ...errors, startDate: '', endDate: '' });
 
             if (showDefaultCapacityTable) {
+                updateDefaultCapacityTableState({
+                    data: {
+                        capacitySlots: [],
+                        appointmentFreeze: []
+                    }
+                });
                 setShowDefaultCapacityTable(false);
             }
 
